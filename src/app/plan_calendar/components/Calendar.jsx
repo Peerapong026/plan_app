@@ -15,6 +15,7 @@ import PlanModal from "../components/Planmodal";
 
 export default function MyCalendarPage() {
   const [events, setEvents] = useState([]);
+  const [planList, setPlanList] = useState([]); // ✅ แผนเต็มสำหรับ modal
   const [user, setUser] = useState(null);
   const router = useRouter();
   const calendarRef = useRef(null);
@@ -47,6 +48,8 @@ export default function MyCalendarPage() {
       if (result.success) {
         const mine = result.data.filter((plan) => plan.id_name === id_name);
 
+        setPlanList(mine); // ✅ เก็บแผนทั้งหมดไว้
+
         // 📅 ข้อมูลสำหรับปฏิทิน
         setEvents(
           mine.map((plan) => ({
@@ -55,7 +58,6 @@ export default function MyCalendarPage() {
           }))
         );
 
-        // ✅ คำนวณจากงานทั้งหมด (ไม่จำกัดวัน)
         const jobCount = mine.length;
         const progress = Math.min((jobCount / 30) * 100, 100); // 30 งาน = 100%
 
@@ -73,7 +75,10 @@ export default function MyCalendarPage() {
   };
 
   const handleViewMyPlans = () => {
-    setSelectedPlans(events);
+    const sorted = [...planList].sort(
+      (a, b) => new Date(b.date) - new Date(a.date) // ใหม่ → เก่า
+    );
+    setSelectedPlans(sorted);
     setShowPlans(true);
   };
 
@@ -148,6 +153,7 @@ export default function MyCalendarPage() {
         </CardContent>
       </Card>
 
+      {/* 🪟 Modal */}
       {showPlans && (
         <PlanModal
           userName={user?.name || user?.id_name}

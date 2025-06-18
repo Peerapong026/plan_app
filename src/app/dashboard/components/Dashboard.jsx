@@ -9,9 +9,8 @@ import { Progress } from "../../components/ui/Progess";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { CardContent } from "../../components/ui/CardContent";
-import { LogOut, CalendarDays, FileDown } from "lucide-react";
+import { LogOut, CalendarDays } from "lucide-react";
 import PlanModal from "../components/Planmodal";
-
 
 const pastelColors = [
   "#A5D8FF", "#FFC9DE", "#C5F6FA", "#E0BBE4", "#FFDEB4",
@@ -29,6 +28,7 @@ const getColorFromName = (name) => {
 
 export default function DashboardPage() {
   const [events, setEvents] = useState([]);
+  const [planList, setPlanList] = useState([]); // ✅ เก็บ raw plan เต็ม
   const [user, setUser] = useState(null);
   const router = useRouter();
   const [summary, setSummary] = useState([]);
@@ -44,6 +44,8 @@ export default function DashboardPage() {
       const res = await fetch("/api/get/get-plan/");
       const result = await res.json();
       if (result.success) {
+        setPlanList(result.data); // ✅ เก็บ plan ทั้งหมด
+
         const filtered = result.data.filter((plan) => {
           const d = new Date(plan.date);
           return d.getMonth() === month && d.getFullYear() === year;
@@ -53,16 +55,12 @@ export default function DashboardPage() {
           filtered.map((plan) => {
             const name = plan.userName || "ไม่ระบุ";
             const color = getColorFromName(name);
-
             return {
               title: `${name}: ${plan.title}`,
               start: new Date(plan.date).toISOString().split("T")[0],
               backgroundColor: color,
               borderColor: color,
               textColor: "#333",
-              extendedProps: {
-                id_name: plan.id_name || ""
-              }
             };
           })
         );
@@ -110,7 +108,9 @@ export default function DashboardPage() {
   }, [user]);
 
   const handleViewPlans = (userName) => {
-    const plans = events.filter((e) => e.title.startsWith(userName + ": "));
+    const plans = planList
+      .filter((p) => p.userName === userName)
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // ✅ ใหม่ → เก่า
     setSelectedUserPlans(plans);
     setShowUserPlans(userName);
   };
@@ -132,22 +132,6 @@ export default function DashboardPage() {
           <LogOut size={16} />
           ออกจากระบบ
         </Button>
-      </div>
-
-      <div className="flex flex-wrap gap-3 items-center">
-        {/* {user?.role === "admin" && (
-          <Link href="/plan_team">
-            <Button className="flex items-center gap-2">
-              <PlusCircle size={16} />
-              เพิ่มแพลนงาน
-            </Button>
-          </Link>
-        )} */}
-
-        {/* <Button variant="ghost" className="ml-auto flex items-center gap-2">
-          <FileDown size={16} />
-          ส่งออกรายงาน
-        </Button> */}
       </div>
 
       <Card className="rounded-2xl shadow-md">
@@ -173,11 +157,7 @@ export default function DashboardPage() {
                 <Progress value={u.progress} />
               </div>
               <div className="flex gap-2 mt-2 sm:mt-0">
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => handleViewPlans(u.name)}
-                  >
+                <Button variant="default" size="sm" onClick={() => handleViewPlans(u.name)}>
                   🔍 ดูแพลน
                 </Button>
               </div>
