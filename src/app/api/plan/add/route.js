@@ -15,31 +15,51 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: "ไม่พบผู้ใช้ในระบบ" }, { status: 404 });
     }
 
-    // 📅 สร้างรหัส Id_title
+    // 📅 สร้างรหัส Id_title แบบไม่ซ้ำ พร้อม retry
     const today = new Date();
-    const datePart = today
-      .toISOString()
-      .slice(2, 10) // "25-06-11"
-      .replace(/-/g, ""); // "250611"
-
+    const datePart = today.toISOString().slice(2, 10).replace(/-/g, ""); // เช่น "250618"
     const prefix = `PLN${datePart}`;
+    let retries = 3;
+    let newPlan;
 
-    // 🔍 ดึงจำนวนแผนที่มี prefix นี้แล้ว
-    const countToday = await Plan.countDocuments({
-      Id_title: { $regex: `^${prefix}` },
-    });
+    while (retries > 0) {
+      try {
+        // 🔍 หา Id_title ล่าสุดของวัน
+        const latestPlan = await Plan.findOne({
+          Id_title: { $regex: `^${prefix}` },
+        }).sort({ Id_title: -1 }).lean();
 
-    const runningNumber = String(countToday + 1).padStart(3, "0"); // เช่น 001
-    const Id_title = `${prefix}${runningNumber}`; // เช่น PLN250611001
+        let runningNumber = "001";
+        if (latestPlan) {
+          const lastNumber = parseInt(latestPlan.Id_title.slice(-3));
+          runningNumber = String(lastNumber + 1).padStart(3, "0");
+        }
 
-    const newPlan = await Plan.create({
-      Id_title,
-      title: body.title,
-      date: body.date,
-      id_name: user.id_name,
-    });
+        const Id_title = `${prefix}${runningNumber}`;
+
+        newPlan = await Plan.create({
+          Id_title,
+          title: body.title,
+          date: body.date,
+          id_name: user.id_name,
+        });
+
+        break; // สำเร็จ ออกจาก loop
+      } catch (err) {
+        if (err.code === 11000) {
+          retries--; // ถ้ารหัสซ้ำ ลองใหม่
+        } else {
+          throw err; // ถ้าเป็น error อื่น ส่งออกไป catch ด้านล่าง
+        }
+      }
+    }
+
+    if (!newPlan) {
+      return NextResponse.json({ success: false, error: "สร้างรหัสไม่สำเร็จหลังลองซ้ำหลายครั้ง" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, data: newPlan });
+
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
