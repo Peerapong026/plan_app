@@ -120,7 +120,7 @@ const handleViewMyPlans = () => {
               <div className="w-full max-w-xs">
                 <Progress value={u.progress} />
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-end mt-3.5">
                 <Button
                   variant="default"
                   size="sm"

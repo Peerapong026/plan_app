@@ -13,10 +13,11 @@ export function Button({ children, className = "", variant = "default", ...props
     <button
       className={`
         ${variants[variant] || variants.default}
-        font-semibold text-sm tracking-wide 
-        px-5 py-2.5 rounded-2xl shadow-md 
-        transition duration-300 ease-in-out 
-        transform hover:scale-[1.03] active:scale-95 
+        font-semibold tracking-wide text-xs sm:text-sm md:text-sm
+        px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5
+        rounded-2xl shadow-md min-w-[80px] text-center
+        transition duration-300 ease-in-out
+        transform hover:scale-[1.03] active:scale-95
         disabled:opacity-40 disabled:cursor-not-allowed
         ${className}
       `}
