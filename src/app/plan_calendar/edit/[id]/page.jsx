@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
 
 export default function EditPlanPage() {
   const { id } = useParams();
@@ -51,11 +52,14 @@ export default function EditPlanPage() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-xl shadow mt-10">
-      <h1 className="text-xl font-bold text-indigo-600 mb-4">✏️ แก้ไขแผน</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100 px-4">
+      <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md animate-fade-in">
+        <h1 className="text-2xl font-extrabold text-purple-700 mb-6 text-center flex items-center justify-center gap-2">
+      <Pencil className="w-6 h-6" /> แก้ไขแพลนงาน
+        </h1>
       <div className="space-y-4">
         <div>
-          <label className="text-sm text-gray-600">ชื่อแผน</label>
+          <label className="text-sm text-gray-600">ชื่อกิจกรรม</label>
           <Input
             value={plan.title}
             onChange={(e) => setPlan({ ...plan, title: e.target.value })}
@@ -79,5 +83,6 @@ export default function EditPlanPage() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

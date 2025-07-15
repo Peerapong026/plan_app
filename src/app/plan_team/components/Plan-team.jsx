@@ -89,6 +89,15 @@ export default function AddPlanPage() {
           >
             {isLoading ? '⏳ กำลังบันทึก...' : '✅ บันทึกแพลน'}
           </Button>
+           <div className="flex justify-center mt-4">
+            <Button
+              variant="secondary"
+              className="w-full py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+              onClick={() => router.push("/plan_calendar")}
+            >
+              🔙 ย้อนกลับ
+            </Button>
+            </div>
         </div>
       </div>
     </div>
