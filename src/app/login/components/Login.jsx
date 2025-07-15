@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 // import Image from 'next/image';
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 // import LogoSF from '../../../public/SFLogo.png';
-import Container from '../components/Container'; // แก้ path ให้ถูกถ้าจำเป็น
+import Container from '../components/Container';
 
 function LoginPage() {
   const [id_name, setid_name] = useState('');

@@ -109,8 +109,16 @@ export default function DashboardPage() {
 
   const handleViewPlans = (userName) => {
     const plans = planList
-      .filter((p) => p.userName === userName)
+      .filter((p) => {
+        const d = new Date(p.date);
+        return (
+          p.userName === userName &&
+          d.getMonth() === selectedMonth &&
+          d.getFullYear() === selectedYear
+        );
+      })
       .sort((a, b) => new Date(b.date) - new Date(a.date)); // ✅ ใหม่ → เก่า
+
     setSelectedUserPlans(plans);
     setShowUserPlans(userName);
   };

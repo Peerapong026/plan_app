@@ -22,6 +22,7 @@ export default function MyCalendarPage() {
   const [mySummary, setMySummary] = useState([]);
   const [selectedPlans, setSelectedPlans] = useState([]);
   const [showPlans, setShowPlans] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -37,8 +38,13 @@ export default function MyCalendarPage() {
     }
 
     setUser(parsedUser);
-    fetchMyPlans(parsedUser.id_name, parsedUser.name);
   }, []);
+
+    useEffect(() => {
+      if (user) {
+        fetchMyPlans(user.id_name, user.name);
+      }
+    }, [user, currentMonth]);
 
   const fetchMyPlans = async (id_name, name) => {
     try {
@@ -58,7 +64,16 @@ export default function MyCalendarPage() {
           }))
         );
 
-        const jobCount = mine.length;
+        const filteredThisMonth = mine.filter(plan => {
+          const planDate = new Date(plan.date);
+          return (
+            planDate.getMonth() === currentMonth.getMonth() &&
+            planDate.getFullYear() === currentMonth.getFullYear()
+          );
+        });
+
+        const jobCount = filteredThisMonth.length;
+
         const progress = Math.min((jobCount / 30) * 100, 100); // 30 งาน = 100%
 
         setMySummary([
@@ -149,6 +164,16 @@ export default function MyCalendarPage() {
             initialView="dayGridMonth"
             events={events}
             height={500}
+            datesSet={(arg) => {
+              // ดึงเดือนที่ปฏิทินกำลังแสดงจริง ๆ (ไม่ใช่วันเริ่มสัปดาห์)
+              const viewStartDate = new Date(arg.view.currentStart); // ✅ ใช้ currentStart แทน
+              const middleOfMonth = new Date(
+                viewStartDate.getFullYear(),
+                viewStartDate.getMonth(),
+                15
+              ); // กลางเดือนเพื่อกันเพี้ยน
+              setCurrentMonth(middleOfMonth);
+            }}
           />
         </CardContent>
       </Card>
